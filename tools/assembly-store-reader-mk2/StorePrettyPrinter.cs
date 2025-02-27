@@ -18,7 +18,7 @@ class StorePrettyPrinter
 	public void Show ()
 	{
 		Console.WriteLine ($"Store: {explorer.StorePath}");
-		Console.WriteLine ($"  Target architecture: {GetTargetArch (explorer)} ({GetBitness (explorer.Is64Bit)}-bit)");
+		Console.WriteLine ($"  Target architecture: {GetTargetArch (explorer)}{ (explorer.TargetArch != AndroidTargetArch.None ? $" ({GetBitness (explorer.Is64Bit)}-bit)" : "") }");
 		Console.WriteLine ($"  Assembly count: {explorer.AssemblyCount}");
 		Console.WriteLine ($"  Index entry count: {explorer.IndexEntryCount}");
 		Console.WriteLine ();
@@ -37,6 +37,8 @@ class StorePrettyPrinter
 			line.Clear ();
 			line.Append ("  ");
 			line.AppendLine (assembly.Name);
+			line.Append ("    Mapping Index: ");
+			line.AppendLine (assembly.MappingIndex.ToString());
 			line.Append ("    PE image data: ");
 			FormatOffsetAndSize (line, assembly.DataOffset, assembly.DataSize);
 			line.AppendLine ();
@@ -94,15 +96,12 @@ class StorePrettyPrinter
 
 	static string GetTargetArch (AssemblyStoreExplorer storeExplorer)
 	{
-		if (storeExplorer.TargetArch == null) {
-			return "ABI agnostic";
-		}
-
 		return storeExplorer.TargetArch switch {
 			AndroidTargetArch.Arm64  => "Arm64",
 			AndroidTargetArch.Arm    => "Arm32",
 			AndroidTargetArch.X86_64 => "x64",
 			AndroidTargetArch.X86    => "x86",
+			AndroidTargetArch.None   => "ABI agnostic",
 			_ => throw new NotSupportedException ($"Unsupported target architecture {storeExplorer.TargetArch}")
 		};
 	}

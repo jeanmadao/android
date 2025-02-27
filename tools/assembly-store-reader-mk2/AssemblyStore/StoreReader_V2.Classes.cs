@@ -59,6 +59,7 @@ partial class StoreReader_V2
 		public StoreItem_V2 (AndroidTargetArch targetArch, string name, bool is64Bit, List<IndexEntry> indexEntries, EntryDescriptor descriptor)
 			: base (name, is64Bit, IndexToHashes (indexEntries))
 		{
+			MappingIndex = descriptor.mapping_index;
 			DataOffset = descriptor.data_offset;
 			DataSize = descriptor.data_size;
 			DebugOffset = descriptor.debug_data_offset;

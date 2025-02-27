@@ -25,6 +25,7 @@ static class Utils
 
 	public const uint ZIP_MAGIC = 0x4034b50;
 	public const uint ASSEMBLY_STORE_MAGIC = 0x41424158;
+	public const uint ASSEMBLY_STORE_FORMAT_VERSION = 1;
 	public const uint ELF_MAGIC = 0x464c457f;
 
 	public static readonly ArrayPool<byte> BytePool = ArrayPool<byte>.Shared;
