@@ -5,6 +5,7 @@ using System.IO;
 using K4os.Compression.LZ4;
 using Xamarin.Tools.Zip;
 using Xamarin.Android.AssemblyStore;
+using System.Collections.Generic;
 
 namespace Xamarin.Android.Tools.DecompressAssemblies
 {
@@ -103,18 +104,12 @@ namespace Xamarin.Android.Tools.DecompressAssemblies
 
 		static bool UncompressFromAPK_AssemblyStores (string filePath, string prefix)
 		{
-			var explorer = new AssemblyStoreExplorer (filePath, keepStoreInMemory: true);
-			foreach (AssemblyStoreAssembly assembly in explorer.Assemblies) {
-				string assemblyName = assembly.DllName;
+			(IList<AssemblyStoreExplorer>? explorers, string? errorMessage) = AssemblyStoreExplorer.Open (filePath);
+			foreach (AssemblyStoreExplorer store in explorers) {
+				foreach (AssemblyStoreItem assembly in store.Assemblies) {
+					string assemblyName = $"{assembly.TargetArch}/{assembly.Name}";
 
-				if (!String.IsNullOrEmpty (assembly.Store.Arch)) {
-					assemblyName = $"{assembly.Store.Arch}/{assemblyName}";
-				}
-
-				using (var stream = new MemoryStream ()) {
-					assembly.ExtractImage (stream);
-					stream.Seek (0, SeekOrigin.Begin);
-					UncompressDLL (stream, $"{filePath}!{assemblyName}", assemblyName, prefix);
+					UncompressDLL (store.ReadImageData(assembly), $"{filePath}!{assemblyName}", assemblyName, prefix);
 				}
 			}
 
@@ -124,11 +119,11 @@ namespace Xamarin.Android.Tools.DecompressAssemblies
 		static bool UncompressFromAPK (string filePath, string assembliesPath)
 		{
 			string prefix = $"uncompressed-{Path.GetFileNameWithoutExtension (filePath)}{Path.DirectorySeparatorChar}";
-			using (ZipArchive apk = ZipArchive.Open (filePath, FileMode.Open)) {
-				if (!apk.ContainsEntry ($"{assembliesPath}assemblies.blob")) {
-					return UncompressFromAPK_IndividualEntries (apk, filePath, assembliesPath, prefix);
-				}
-			}
+			// using (ZipArchive apk = ZipArchive.Open (filePath, FileMode.Open)) {
+			// 	if (!apk.ContainsEntry ($"{assembliesPath}assemblies.blob")) {
+			// 		return UncompressFromAPK_IndividualEntries (apk, filePath, assembliesPath, prefix);
+			// 	}
+			// }
 
 			return UncompressFromAPK_AssemblyStores (filePath, prefix);
 		}
@@ -150,7 +145,7 @@ namespace Xamarin.Android.Tools.DecompressAssemblies
 				}
 
 				if (String.Compare (".apk", ext, StringComparison.OrdinalIgnoreCase) == 0) {
-					if (!UncompressFromAPK (file, "assemblies/")) {
+					if (!UncompressFromAPK (file, "assemblies/") && !UncompressFromAPK (file, "lib/")) {
 						haveErrors = true;
 					}
 					continue;
