@@ -26,6 +26,8 @@ namespace Xamarin.Android.Tools.DecompressAssemblies
 
 		static bool UncompressDLL (Stream inputStream, string fileName, string filePath, string prefix)
 		{
+			if (String.IsNullOrEmpty (prefix))
+				filePath = Path.GetFileNameWithoutExtension(filePath);
 			string outputFile = $"{prefix}{filePath}";
 			bool retVal = true;
 
@@ -139,6 +141,13 @@ namespace Xamarin.Android.Tools.DecompressAssemblies
 				string ext = Path.GetExtension (file);
 				if (String.Compare (".dll", ext, StringComparison.OrdinalIgnoreCase) == 0) {
 					if (!UncompressDLL (file, "uncompressed-")) {
+						haveErrors = true;
+					}
+					continue;
+				}
+
+				if (String.Compare (".lz4", ext, StringComparison.OrdinalIgnoreCase) == 0) {
+					if (!UncompressDLL (file, "")) {
 						haveErrors = true;
 					}
 					continue;
