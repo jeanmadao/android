@@ -1,14 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Buffers;
 using System.IO;
 
 using K4os.Compression.LZ4;
-using Microsoft.Android.Build.Tasks;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Xamarin.Android.Tasks;
-using Xamarin.Android.Tools;
 
 namespace Xamarin.Android.Tasks
 {
@@ -113,7 +107,7 @@ namespace Xamarin.Android.Tasks
 			return CompressionResult.Success;
 		}
 
-		public static bool TryCompress (TaskLoggingHelper log, string sourceAssembly, string destinationAssembly, uint descriptorIndex)
+		public static bool TryCompress (string sourceAssembly, string destinationAssembly, uint descriptorIndex)
 		{
 			AssemblyData compressedAssembly = new AssemblyData (sourceAssembly, descriptorIndex);
 			CompressionResult result = Compress (compressedAssembly, destinationAssembly);
@@ -121,64 +115,21 @@ namespace Xamarin.Android.Tasks
 			if (result != CompressionResult.Success) {
 				switch (result) {
 					case CompressionResult.EncodingFailed:
-						log.LogMessage ($"Failed to compress {sourceAssembly}");
+						Console.WriteLine ($"Failed to compress {sourceAssembly}");
 						break;
 					case CompressionResult.InputTooBig:
-						log.LogMessage ($"Input assembly {sourceAssembly} exceeds maximum input size");
+						Console.WriteLine ($"Input assembly {sourceAssembly} exceeds maximum input size");
 						break;
 					default:
-						log.LogMessage ($"Unknown error compressing {sourceAssembly}");
+						Console.WriteLine ($"Unknown error compressing {sourceAssembly}");
 						break;
 				}
 
 				return false;
 			}
+			Console.WriteLine ($"Successfully compressed \"{sourceAssembly}\" to path \"{destinationAssembly}\"");
 
 			return true;
-		}
-
-		// Gets the descriptor index for the specified assembly from the compressed assembly info
-		public static bool TryGetDescriptorIndex (TaskLoggingHelper log, ITaskItem assembly, IDictionary<AndroidTargetArch, Dictionary<string, CompressedAssemblyInfo>> compressedAssembliesInfo, out uint descriptorIndex)
-		{
-			descriptorIndex = 0;
-
-			var key = CompressedAssemblyInfo.GetDictionaryKey (assembly);
-			var arch = MonoAndroidHelper.GetTargetArch (assembly);
-
-			if (!compressedAssembliesInfo.TryGetValue (arch, out Dictionary<string, CompressedAssemblyInfo> assembliesInfo)) {
-				throw new InvalidOperationException ($"Internal error: compression assembly info for architecture {arch} not available");
-			}
-
-			if (!assembliesInfo.TryGetValue (key, out CompressedAssemblyInfo info) || info == null) {
-				log.LogDebugMessage ($"Assembly missing from {nameof (CompressedAssemblyInfo)}: {key}");
-				return false;
-			}
-
-			descriptorIndex = info.DescriptorIndex;
-
-			return true;
-		}
-
-		// Gets the output path for the compressed assembly
-		public static string GetCompressedAssemblyOutputPath (ITaskItem assembly, string compressedOutputDir)
-		{
-			var assemblyOutputDir = GetCompressedAssemblyOutputDirectory (assembly, compressedOutputDir);
-			return Path.Combine (assemblyOutputDir, $"{Path.GetFileName (assembly.ItemSpec)}.lz4");
-		}
-
-		static string GetCompressedAssemblyOutputDirectory (ITaskItem assembly, string compressedOutputDir)
-		{
-			string assemblyOutputDir;
-			string subDirectory = assembly.GetMetadata ("DestinationSubDirectory");
-			string abi = MonoAndroidHelper.GetAssemblyAbi (assembly);
-
-			if (!string.IsNullOrEmpty (subDirectory) && !(subDirectory.EndsWith ($"{abi}/", StringComparison.Ordinal) || subDirectory.EndsWith ($"{abi}\\", StringComparison.Ordinal))) {
-				assemblyOutputDir = Path.Combine (compressedOutputDir, abi, subDirectory);
-			} else {
-				assemblyOutputDir = Path.Combine (compressedOutputDir, abi);
-			}
-
-			return assemblyOutputDir;
 		}
 	}
 }
