@@ -191,7 +191,7 @@ partial class StoreReader_V1 : AssemblyStoreReader
 		var storeItems = new List<AssemblyStoreItem> ();
 		for (uint i = 0; i < header.local_entry_count; i++) {
 			entries.TryGetValue(i, out AssemblyStoreManifestEntry entry);
-			var item = new StoreItem_V1 (TargetArch, entry.Name, Is64Bit, descriptors[(int)i], new List<ulong> { entry.Hash32, entry.Hash64 }, entry.MappingIndex);
+			var item = new StoreItem_V1 (TargetArch, entry.Name + ".dll", Is64Bit, descriptors[(int)i], new List<ulong> { entry.Hash32, entry.Hash64 }, entry.MappingIndex);
 			storeItems.Add (item);
 		}
 		Assemblies = storeItems.AsReadOnly ();
