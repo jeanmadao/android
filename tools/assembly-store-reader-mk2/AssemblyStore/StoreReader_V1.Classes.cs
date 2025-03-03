@@ -186,17 +186,4 @@ partial class StoreReader_V1
 		}
 	}
 
-	sealed class TemporaryItem
-	{
-		public readonly string Name;
-		// public readonly List<IndexEntry> IndexEntries = new List<IndexEntry> ();
-		public readonly EntryDescriptor Descriptor;
-
-		public TemporaryItem (string name, EntryDescriptor descriptor)
-		{
-			Name = name;
-			Descriptor = descriptor;
-		}
-	}
-
 }
