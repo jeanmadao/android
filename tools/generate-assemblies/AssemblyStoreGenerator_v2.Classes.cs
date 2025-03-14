@@ -1,6 +1,6 @@
 namespace Xamarin.Android.Tasks;
 
-partial class AssemblyStoreGenerator
+partial class AssemblyStoreGenerator_v2
 {
 	sealed class AssemblyStoreHeader
 	{

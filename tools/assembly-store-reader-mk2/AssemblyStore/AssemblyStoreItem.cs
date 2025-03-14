@@ -9,7 +9,9 @@ abstract class AssemblyStoreItem
 	public string Name                  { get; }
 	public IList<ulong> Hashes          { get; }
 	public bool Is64Bit                 { get; }
-	public uint MappingIndex              { get; protected set; }
+	public uint MappingIndex            { get; protected set; }
+	public uint LocalStoreIndex         { get; protected set; }
+	public uint StoreID                 { get; protected set; }
 	public uint DataOffset              { get; protected set; }
 	public uint DataSize                { get; protected set; }
 	public uint DebugOffset             { get; protected set; }

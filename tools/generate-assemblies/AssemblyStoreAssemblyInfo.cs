@@ -17,12 +17,12 @@ class AssemblyStoreAssemblyInfo
 	public FileInfo? SymbolsFile         { get; set; }
 	public FileInfo? ConfigFile          { get; set; }
 
-	public AssemblyStoreAssemblyInfo (string sourceFilePath, ITaskItem assembly)
+	public AssemblyStoreAssemblyInfo (string sourceFilePath, AndroidTargetArch arch, string srcDir)
 	{
-		Arch = MonoAndroidHelper.GetTargetArch (assembly);
-		if (Arch == AndroidTargetArch.None) {
-			throw new InvalidOperationException ($"Internal error: assembly item '{assembly}' lacks ABI information metadata");
-		}
+		Arch = arch;
+		// if (Arch == AndroidTargetArch.None) {
+		// 	throw new InvalidOperationException ($"Internal error: assembly item '{sourceFilePath}' lacks ABI information metadata");
+		// }
 
 		SourceFile = new FileInfo (sourceFilePath);
 
@@ -36,10 +36,10 @@ class AssemblyStoreAssemblyInfo
 		}
 
 		string nameNoExt = Path.GetFileNameWithoutExtension (name);
-		string? culture = assembly.GetMetadata ("Culture");
-		if (!String.IsNullOrEmpty (culture)) {
-			name = $"{culture}/{name}";
-			nameNoExt = $"{culture}/{nameNoExt}";
+		string parentDir = Directory.GetParent (sourceFilePath).Name;
+		if (parentDir != Directory.GetParent(srcDir).Name) {
+			name = $"{parentDir}/{name}";
+			nameNoExt = $"{parentDir}/{nameNoExt}";
 		}
 
 		(AssemblyName, AssemblyNameBytes) = SetName (name);

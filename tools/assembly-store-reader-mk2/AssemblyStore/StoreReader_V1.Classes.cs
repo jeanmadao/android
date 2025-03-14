@@ -172,10 +172,12 @@ partial class StoreReader_V1
 
 	sealed class StoreItem_V1 : AssemblyStoreItem
 	{
-		public StoreItem_V1 (AndroidTargetArch targetArch, string name, bool is64Bit, EntryDescriptor descriptor, List<ulong> hashes, uint mapping_index)
+		public StoreItem_V1 (AndroidTargetArch targetArch, string name, bool is64Bit, EntryDescriptor descriptor, List<ulong> hashes, uint mapping_index, uint local_store_index, uint store_id)
 			: base (name, is64Bit, hashes)
 		{
 			MappingIndex = mapping_index;
+			LocalStoreIndex = local_store_index;
+			StoreID = store_id;
 			DataOffset = descriptor.data_offset;
 			DataSize = descriptor.data_size;
 			DebugOffset = descriptor.debug_data_offset;
